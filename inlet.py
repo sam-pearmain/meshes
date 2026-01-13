@@ -76,8 +76,8 @@ def main():
     cl1: int = gmsh.model.geo.addCurveLoop(
         [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11]
     )
-    gmsh.model.geo.addPlaneSurface([cl1])
-    walls = [l2, l3, l4, l6, l7, l8]
+    sf1: int = gmsh.model.geo.addPlaneSurface([cl1])
+    walls = [l1, l2, l3, l4, l6, l7, l8]
 
     gmsh.model.geo.synchronize()
 
@@ -89,13 +89,26 @@ def main():
     threshold = gmsh.model.mesh.field.add("Threshold")
     gmsh.model.mesh.field.setNumber(threshold, "InField", distance)
     gmsh.model.mesh.field.setNumber(threshold, "SizeMin", lc_wall)
-    gmsh.model.mesh.field.setNumber(threshold, "DistMin", 0.5)
+    gmsh.model.mesh.field.setNumber(threshold, "DistMin", 6.0)
     gmsh.model.mesh.field.setNumber(threshold, "SizeMax", lc_far)
-    gmsh.model.mesh.field.setNumber(threshold, "DistMax", 20.0)
+    gmsh.model.mesh.field.setNumber(threshold, "DistMax", 80.0)
     gmsh.model.mesh.field.setAsBackgroundMesh(threshold)
 
     # meshing algorithm
     gmsh.option.setNumber("Mesh.Algorithm", 6)
+
+    # physical groups
+    fluid = gmsh.model.addPhysicalGroup(2, [sf1])
+    inlet = gmsh.model.addPhysicalGroup(1, [l11])
+    outlet = gmsh.model.addPhysicalGroup(1, [l5, l9])
+    top = gmsh.model.addPhysicalGroup(1, [l10])
+    wall = gmsh.model.addPhysicalGroup(1, walls)
+
+    gmsh.model.setPhysicalName(2, fluid, "fluid")
+    gmsh.model.setPhysicalName(1, inlet, "inlet")
+    gmsh.model.setPhysicalName(2, outlet, "outlet")
+    gmsh.model.setPhysicalName(2, top, "top")
+    gmsh.model.setPhysicalName(2, wall, "wall")
 
     # generate
     gmsh.model.mesh.generate(2)
