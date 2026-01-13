@@ -110,9 +110,9 @@ def main():
     gmsh.model.setPhysicalName(2, top, "top")
     gmsh.model.setPhysicalName(2, wall, "wall")
 
-    # generate
+    # generate and write out
     gmsh.model.mesh.generate(2)
-    gmsh.fltk.run()
+    gmsh.write("inlet.msh")
     gmsh.finalize()
 
 
