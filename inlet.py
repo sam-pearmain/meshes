@@ -16,36 +16,39 @@ KINK_LENGTH = (RAMP_HEIGHT - tan(radians(RAMP_ANGLE_TWO)) * RAMP_LENGTH) / (
 KINK_HEIGHT = tan(radians(RAMP_ANGLE_ONE)) * KINK_LENGTH
 
 
-LC = 0.8
-BL_THICKNESS = 4.0
-BL_LMIN = 0.1
-
 def main():
     gmsh.initialize()
     gmsh.model.add("inlet")
+    lc_wall = 0.05
+    lc_far = 2.0
 
     # domain bounds
-    p1 = gmsh.model.geo.addPoint(0, 0, 0, LC)
-    _p2 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, 0, 0, LC)
-    p3 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, DOMAIN_HEIGHT, 0, LC)
-    p4 = gmsh.model.geo.addPoint(0, DOMAIN_HEIGHT, 0, LC)
+    p1 = gmsh.model.geo.addPoint(0, 0, 0, lc_wall)
+    p2 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, 0, 0, lc_far)
+    p3 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, DOMAIN_HEIGHT, 0, lc_far)
+    p4 = gmsh.model.geo.addPoint(0, DOMAIN_HEIGHT, 0, lc_far)
 
     # ramp points
-    p5 = gmsh.model.geo.addPoint(DOMAIN_LENGTH - INTAKE_LENGTH, 0, 0, LC)
+    p5 = gmsh.model.geo.addPoint(DOMAIN_LENGTH - INTAKE_LENGTH, 0, 0, lc_wall)
     p6 = gmsh.model.geo.addPoint(
-        DOMAIN_LENGTH - INTAKE_LENGTH + KINK_LENGTH, KINK_HEIGHT, 0, LC
+        DOMAIN_LENGTH - INTAKE_LENGTH + KINK_LENGTH, KINK_HEIGHT, 0, lc_wall
     )
     p7 = gmsh.model.geo.addPoint(
-        DOMAIN_LENGTH - INTAKE_LENGTH + RAMP_LENGTH, RAMP_HEIGHT, 0, LC
+        DOMAIN_LENGTH - INTAKE_LENGTH + RAMP_LENGTH, RAMP_HEIGHT, 0, lc_wall
     )
-    p8 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, RAMP_HEIGHT, 0, LC)
+    p8 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, RAMP_HEIGHT, 0, lc_wall)
 
     # cowl points
     p9 = gmsh.model.geo.addPoint(
-        DOMAIN_LENGTH - INTAKE_LENGTH + RAMP_LENGTH, RAMP_HEIGHT + THROAT_HEIGHT, 0, LC
+        DOMAIN_LENGTH - INTAKE_LENGTH + RAMP_LENGTH,
+        RAMP_HEIGHT + THROAT_HEIGHT,
+        0,
+        lc_wall,
     )
-    p10 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, RAMP_HEIGHT + THROAT_HEIGHT, 0, LC)
-    p11 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, INTAKE_HEIGHT, 0, LC)
+    p10 = gmsh.model.geo.addPoint(
+        DOMAIN_LENGTH, RAMP_HEIGHT + THROAT_HEIGHT, 0, lc_wall
+    )
+    p11 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, INTAKE_HEIGHT, 0, lc_wall)
     p12 = gmsh.model.geo.addPoint(
         DOMAIN_LENGTH
         - INTAKE_LENGTH
@@ -53,7 +56,7 @@ def main():
         + (COWL_HEIGHT / tan(radians(COWL_ANGLE))),
         INTAKE_HEIGHT,
         0,
-        LC,
+        lc_wall,
     )
 
     # lines
@@ -73,8 +76,8 @@ def main():
     cl1: int = gmsh.model.geo.addCurveLoop(
         [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11]
     )
-    _plane: int = gmsh.model.geo.addPlaneSurface([cl1])
-    walls = [l1, l2, l3, l4]
+    gmsh.model.geo.addPlaneSurface([cl1])
+    walls = [l2, l3, l4, l6, l7, l8]
 
     gmsh.model.geo.synchronize()
 
@@ -83,23 +86,13 @@ def main():
     gmsh.model.mesh.field.setNumbers(distance, "CurvesList", walls)
 
     # threshold field
-    threshold: int = gmsh.model.mesh.field.add("Threshold")
+    threshold = gmsh.model.mesh.field.add("Threshold")
     gmsh.model.mesh.field.setNumber(threshold, "InField", distance)
-    gmsh.model.mesh.field.setNumber(threshold, "SizeMin", 0.5)
-    gmsh.model.mesh.field.setNumber(threshold, "SizeMax", LC)
-    gmsh.model.mesh.field.setNumber(threshold, "DistMin", BL_THICKNESS)
-    gmsh.model.mesh.field.setNumber(threshold, "DistMax", BL_THICKNESS + 20)
+    gmsh.model.mesh.field.setNumber(threshold, "SizeMin", lc_wall)
+    gmsh.model.mesh.field.setNumber(threshold, "DistMin", 0.5)
+    gmsh.model.mesh.field.setNumber(threshold, "SizeMax", lc_far)
+    gmsh.model.mesh.field.setNumber(threshold, "DistMax", 20.0)
     gmsh.model.mesh.field.setAsBackgroundMesh(threshold)
-
-    # boundary field
-    boundary = gmsh.model.mesh.field.add("BoundaryLayer")
-    gmsh.model.mesh.field.setNumbers(boundary, "CurvesList", walls)
-    gmsh.model.mesh.field.setNumber(boundary, "Size", BL_LMIN)
-    gmsh.model.mesh.field.setNumber(boundary, "Ratio", 1.2)
-    gmsh.model.mesh.field.setNumber(boundary, "Thickness", BL_THICKNESS)
-    gmsh.model.mesh.field.setNumber(boundary, "Quads", 1)
-    gmsh.model.mesh.field.setNumbers(boundary, "PointsList", [p9])
-    gmsh.model.mesh.field.setAsBoundaryLayer(boundary)
 
     # meshing algorithm
     gmsh.option.setNumber("Mesh.Algorithm", 6)
@@ -112,4 +105,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
