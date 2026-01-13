@@ -24,7 +24,7 @@ def main():
 
     # domain bounds
     p1 = gmsh.model.geo.addPoint(0, 0, 0, lc_wall)
-    p2 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, 0, 0, lc_far)
+    _p2 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, 0, 0, lc_far)
     p3 = gmsh.model.geo.addPoint(DOMAIN_LENGTH, DOMAIN_HEIGHT, 0, lc_far)
     p4 = gmsh.model.geo.addPoint(0, DOMAIN_HEIGHT, 0, lc_far)
 
