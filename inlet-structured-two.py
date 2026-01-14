@@ -59,7 +59,7 @@ def main():
     p17 = gmsh.model.geo.addPoint(x_start, y_split, 0, lc)         
     p18 = gmsh.model.geo.addPoint(x_ramp_start, y_split, 0, lc)    
     p19 = gmsh.model.geo.addPoint(x_kink, y_split, 0, lc)          
-    p9  = gmsh.model.geo.addPoint(x_throat_start, y_split, 0, lc)  # Cowl Lip
+    p9  = gmsh.model.geo.addPoint(x_throat_start, y_split, 0, lc) 
     
     # cowl
     p12 = gmsh.model.geo.addPoint(x_cowl_tip, intake_height, 0, lc)
