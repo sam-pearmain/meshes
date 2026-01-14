@@ -112,7 +112,7 @@ def main():
 
     # generate and write out
     gmsh.model.mesh.generate(2)
-    gmsh.write("inlet.msh")
+    gmsh.fltk.run()
     gmsh.finalize()
 
 

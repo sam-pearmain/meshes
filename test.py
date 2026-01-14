@@ -28,7 +28,7 @@ def main():
     l7 = gmsh.model.geo.addLine(p7, p1) 
 
     cl = gmsh.model.geo.addCurveLoop([l1, l2, l3, l4, l5, l6, l7])
-    s = gmsh.model.geo.addPlaneSurface([cl])
+    _s = gmsh.model.geo.addPlaneSurface([cl])
 
     gmsh.model.geo.synchronize()
 
