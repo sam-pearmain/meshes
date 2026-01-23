@@ -36,6 +36,7 @@ def main():
 
     bl = gmsh.model.mesh.field.add("BoundaryLayer")
     gmsh.model.mesh.field.setNumbers(bl, "CurvesList", walls)
+    gmsh.model.mesh.field.setNumbers(bl, "PointsList", [p1, p5])
     gmsh.model.mesh.field.setNumber(bl, "Size", 0.005)
     gmsh.model.mesh.field.setNumber(bl, "Ratio", 1.1)
     gmsh.model.mesh.field.setNumber(bl, "Thickness", 0.2)
